@@ -2,5 +2,11 @@
     "commandDescription": "print a greeting and your org IDs",
     "nameFlagDescription": "name to print",
     "forceFlagDescription": "example boolean flag",
-    "errorNoOrgResults": "No results found for the org '%s'."
+    "errorNoOrgResults": "No results found for the org '%s'.",
+    "share": {
+        "commandDescription": "share a scratch org with someone via email",
+        "flags": {
+            "emailaddress": "email address of the recipients (comma separated for multiple values)"
+        }
+    }
 }
