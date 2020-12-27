@@ -13,12 +13,12 @@ Messages.importMessagesDirectory(__dirname);
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('aa', 'org');
 
-export default class Share extends SfdxCommand {
+export default class OrgShare extends SfdxCommand {
     public static description = messages.getMessage('share.commandDescription');
     protected static requiresUsername = true; // Required username to share
     public static examples = [
-        "$ sfdx tti:org:share -e myawsomeemail@salesforce.com",
-        "$ sfdx tti:org:share -e myawsomeemail@salesforce.com,myawsomeemail1@salesforce.com"
+        "$ sfdx aa:org:share -e myawsomeemail@salesforce.com",
+        "$ sfdx aa:org:share -e myawsomeemail@salesforce.com,myawsomeemail1@salesforce.com"
     ]
 
     protected static flagsConfig = {
@@ -31,7 +31,7 @@ export default class Share extends SfdxCommand {
 
     public async run(): Promise<AnyJson> {
         if (this.isValidEmails(this.flags.emailaddress)) {
-            this.ux.startSpinner(`Sharing scratch org to ${this.flags.emailaddress}...`);
+            this.ux.startSpinner(`Sharing scratch org to ${this.flags.emailaddress}`);
             const message = await this.sendEmail();
             this.ux.stopSpinner(`\n${message}`);
             return { message };
@@ -82,7 +82,6 @@ export default class Share extends SfdxCommand {
             body: JSON.stringify({
                 inputs: [{
                     emailBody: `${devHub.getUsername()} has created you a Salesforce org. Here's your login URL: ${orgURL}. Keep this URL confidential and do not share with others.`,
-                    // emailAddresses: this.flags.emailaddress,
                     emailAddressesArray: this.flags.emailaddress,
                     emailSubject: `${devHub.getUsername()} created you a new Salesforce org`,
                     senderType: 'CurrentUser'
