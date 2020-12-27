@@ -1,20 +1,18 @@
-import { exec } from 'child_process'
-import * as util from 'util'
+import { exec } from 'child_process';
+import * as util from 'util';
 
 const execCom = util.promisify(exec);
 
 const exec2SON = async (cmd: string, options = {maxBuffer: 1024 * 1024 * 10}): Promise<any> => {
-    const result = { status: 0, message: '' };
+    let message;
     await execCom(cmd, options)
     .then(response => {
-        const output = response.stdout ? response.stdout : response.stderr;
-        result.message = output;
+        message = response.stdout ? response.stdout : response.stderr;
     })
     .catch(err => {
-        result.status = 1;
-        result.message = err.stderr || err.stdout;
+        throw new Error(err.stderr || err.stdout);
     })
-    return result;
+    return message;
 }
 
 const constructCommand = (command: string, flags: any): any => {
@@ -27,6 +25,4 @@ const constructCommand = (command: string, flags: any): any => {
     }
     return command;
 }
-
-export { execCom, exec2SON, constructCommand};
-export { execCom as exec };
+export { exec2SON as exec, constructCommand };
