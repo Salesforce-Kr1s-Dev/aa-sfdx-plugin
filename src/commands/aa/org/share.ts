@@ -30,10 +30,14 @@ export default class OrgShare extends SfdxCommand {
 
     public async run(): Promise<AnyJson> {
         if (this.isValidEmails(this.flags.emailaddress)) {
-            this.ux.startSpinner(`Sharing scratch org to ${this.flags.emailaddress}`);
-            const message = await this.sendEmail();
-            this.ux.stopSpinner(`\n${message}`);
-            return { message };
+            try {
+                this.ux.startSpinner(`Sharing scratch org to ${this.flags.emailaddress}`);
+                const message = await this.sendEmail();
+                this.ux.stopSpinner(`\n${message}`);
+                return { message };
+            } catch (err) {
+                throw new SfdxError(err.message);
+            }
         }
     }
 
@@ -54,17 +58,13 @@ export default class OrgShare extends SfdxCommand {
      * @description                 Send email using standard Rest API emailSimple
      */
     sendEmail = async () => {
-        let message;
         const devHub = await this.org.getDevHubOrg();
         const payload = await this.buildEmailPayload(devHub);
         await devHub.getConnection().request(payload)
-        .then(() => {
-            message = `Successfully shared ${this.org.getUsername()} with ${this.flags.emailaddress}`;
-        })
         .catch(err => {
-            message = err;
+            throw new SfdxError(err);
         });
-        return message;
+        return `Successfully shared ${this.org.getUsername()} with ${this.flags.emailaddress}`;
     }
 
     /**
@@ -96,13 +96,8 @@ export default class OrgShare extends SfdxCommand {
     fetchOrgURL = async () => {
         let orgURL;
         await exec(`sfdx force:org:open --urlonly -u ${this.org.getUsername()} --json`)
-        .then(value => {
-            if (value.stdout) {
-                orgURL = JSON.parse(value.stdout).result.url;
-            }
-        })
-        .catch(err => {
-            throw new SfdxError(err);
+        .then(response => {
+            orgURL = JSON.parse(response).result.url;
         })
         return orgURL;
     }
