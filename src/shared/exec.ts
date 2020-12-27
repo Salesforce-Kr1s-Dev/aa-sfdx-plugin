@@ -4,8 +4,17 @@ import * as util from 'util'
 const execCom = util.promisify(exec);
 
 const exec2SON = async (cmd: string, options = {maxBuffer: 1024 * 1024 * 10}): Promise<any> => {
-    const results = await execCom(cmd, options);
-    return JSON.parse(results.stdout ? results.stdout : results.stderr);
+    const result = { status: 0, message: '' };
+    await execCom(cmd, options)
+    .then(response => {
+        const output = response.stdout ? response.stdout : response.stderr;
+        result.message = output;
+    })
+    .catch(err => {
+        result.status = 1;
+        result.message = err.stderr || err.stdout;
+    })
+    return result;
 }
 
 const constructCommand = (command: string, flags: any): any => {
