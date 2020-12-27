@@ -1,7 +1,6 @@
 import { flags, SfdxCommand } from '@salesforce/command';
-import { Messages, SfdxError } from '@salesforce/core';
+import { Messages, SfdxError, sfdc } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
-import validator from 'validator';
 
 // Custom imports
 import { exec } from '../../../shared/exec';
@@ -44,7 +43,7 @@ export default class OrgShare extends SfdxCommand {
      * @param emailAddress          Array of email addresses
      */
     isValidEmails = (emailAddress) => {
-        const invalidEmails = emailAddress.filter((el) => !validator.isEmail(el) ? el : '');
+        const invalidEmails = emailAddress.filter((el) => !sfdc.validateEmail(el) ? el : '');
         if (invalidEmails.length > 0) {
             throw new SfdxError(`Invalid Email Address: ${invalidEmails}`);
         }
