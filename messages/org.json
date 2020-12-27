@@ -3,6 +3,20 @@
     "nameFlagDescription": "name to print",
     "forceFlagDescription": "example boolean flag",
     "errorNoOrgResults": "No results found for the org '%s'.",
+    "create": {
+        "commandDescription": "creates a scratch org or a sandbox org; push the source to newly created org",
+        "flags": {
+            "clientid": "a connected app consumer key, as configured in your Dev Hub or production org",
+            "createonly": "create scratch org only",
+            "definitionfile": "path to an org definition file",
+            "durationdays": "duration of the scratch org (in days) (default:7, min:1, max:30)",
+            "noancestors": "do not include second-generation package ancestors in the scratch org",
+            "nonamespace": "create the scratch org with no namespace",
+            "type": "the type of org to create; the creation of sandbox orgs is available as a beta release",
+            "setalias": "alias for the created org",
+            "setdefaultusername": "set the created org as the default username"
+        }
+    },
     "share": {
         "commandDescription": "share a scratch org with someone via email",
         "flags": {
