@@ -2,7 +2,7 @@ import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages, SfdxError } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
 // Custom imports
-import { exec2SON, constructCommand } from '../../../shared/exec';
+import { exec, constructCommand } from '../../../shared/exec';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -106,7 +106,7 @@ export default class OrgCreate extends SfdxCommand {
      */
     createScratchOrg = async () => {
         this.addDefinitionFileIfNone();
-        const response = await this.executeCommand(
+        const response = await exec(
             constructCommand(`sfdx force:org:create --json`, this.flags)
         );
         const username = JSON.parse(response.message).result.username;
@@ -136,20 +136,7 @@ export default class OrgCreate extends SfdxCommand {
     pushSourceToOrg = async (username) => {
         this.ux.setSpinnerStatus('Deploying source to new scratch org...');
         const command = `sfdx force:source:push -f -g -u ${username} -w 10 --json`;
-        await this.executeCommand(command);
+        await exec(command);
         this.ux.setSpinnerStatus(`Successfully deployed the component to ${username}`);
-    }
-
-    /**
-     * @description                 Execute shell commands
-     * 
-     * @param command               command to execute
-     */
-    executeCommand = async (command) => {
-        const result = await exec2SON(command);
-        if (result.status === 1) {
-            throw new SfdxError(result.message);
-        }
-        return result;
     }
 }
