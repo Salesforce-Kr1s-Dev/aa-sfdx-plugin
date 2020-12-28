@@ -120,8 +120,7 @@ export default class OrgCreate extends SfdxCommand {
      * @description                 Add default definition file if there's none
      */
     addDefinitionFileIfNone = () => {
-        const rootDir = process.cwd();
-        const defaultPath = `${rootDir}/config/org/project-scratch-def.json`;
+        const defaultPath = `${__dirname}/../../../../config/org/project-scratch-def.json`;
         if (!this.flags.definitionfile) {
             this.ux.setSpinnerStatus('\nNo Definition File found. Using default definition file...');
             this.flags.definitionfile = defaultPath;
