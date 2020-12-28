@@ -4,5 +4,12 @@
         "flags": {
             "name": "name of community"
         }
+    },
+    "describe": {
+        "commandDescription": "fetch community details",
+        "flags": {
+            "name": "name of community",
+            "store": "store community details in json file"
+        }
     }
 }
