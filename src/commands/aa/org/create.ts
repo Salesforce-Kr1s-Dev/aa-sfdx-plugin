@@ -74,12 +74,13 @@ export default class OrgCreate extends SfdxCommand {
     }
 
     public async run(): Promise<AnyJson> {
+        if (!this.hubOrg) {
+            throw new SfdxError('Please provide development hub for it to continue.');
+        }
+
         const isCreateOnly = this.flags.createonly;
         delete this.flags.createonly;
         try {
-            if (!this.hubOrg) {
-                throw new SfdxError('Please provide development hub for it to continue.');
-            }
             this.ux.startSpinner('Creating scratch org');
             const response = await this.createScratchOrg();
             if (!isCreateOnly) {
