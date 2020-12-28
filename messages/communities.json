@@ -1,0 +1,8 @@
+{
+    "publish": {
+        "commandDescription": "publish community in target org using rest api",
+        "flags": {
+            "name": "name of community"
+        }
+    }
+}
