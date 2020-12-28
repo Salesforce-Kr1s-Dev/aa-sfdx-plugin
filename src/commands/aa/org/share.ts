@@ -29,7 +29,8 @@ export default class OrgShare extends SfdxCommand {
     };
 
     public async run(): Promise<AnyJson> {
-        if (this.isValidEmails(this.flags.emailaddress)) {
+        const invalidEmails = this.fetchInvalidEmails(this.flags.emailaddress);
+        if (invalidEmails.length === 0) {
             try {
                 this.ux.startSpinner(`Sharing scratch org to ${this.flags.emailaddress}`);
                 const message = await this.sendEmail();
@@ -38,6 +39,8 @@ export default class OrgShare extends SfdxCommand {
             } catch (err) {
                 throw new SfdxError(err.message);
             }
+        } else {
+            throw new SfdxError(`Invalid Email Address: ${invalidEmails}`);
         }
     }
 
@@ -46,12 +49,8 @@ export default class OrgShare extends SfdxCommand {
      * 
      * @param emailAddress          Array of email addresses
      */
-    isValidEmails = (emailAddress) => {
-        const invalidEmails = emailAddress.filter((el) => !sfdc.validateEmail(el) ? el : '');
-        if (invalidEmails.length > 0) {
-            throw new SfdxError(`Invalid Email Address: ${invalidEmails}`);
-        }
-        return true;
+    fetchInvalidEmails = (emailAddress) => {
+        return emailAddress.filter((el) => !sfdc.validateEmail(el) ? el : '');
     }
 
     /**
