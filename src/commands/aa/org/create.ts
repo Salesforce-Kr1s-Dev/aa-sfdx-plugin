@@ -77,29 +77,20 @@ export default class OrgCreate extends SfdxCommand {
         const isCreateOnly = this.flags.createonly;
         delete this.flags.createonly;
         try {
-            if (this.isValid()) {
-                this.ux.startSpinner('Creating scratch org');
-                const response = await this.createScratchOrg();
-                if (!isCreateOnly) {
-                    await this.installDependencies(response.username);
-                    await this.pushSourceToOrg(response.username);
-                }
-                this.ux.stopSpinner(response.message);
-                return { message: response.message };
+            if (!this.hubOrg) {
+                throw new SfdxError('Please provide development hub for it to continue.');
             }
+            this.ux.startSpinner('Creating scratch org');
+            const response = await this.createScratchOrg();
+            if (!isCreateOnly) {
+                await this.installDependencies(response.username);
+                await this.pushSourceToOrg(response.username);
+            }
+            this.ux.stopSpinner(response.message);
+            return { message: response.message };
         } catch (err) {
             throw new SfdxError(err.message);
         }
-    }
-
-    /**
-     * @description                 Validate if command has a hub org
-     */
-    isValid = () => {
-        if (!this.hubOrg) {
-            throw new SfdxError('Please provide development hub for it to continue.');
-        }
-        return true;
     }
 
     /**
