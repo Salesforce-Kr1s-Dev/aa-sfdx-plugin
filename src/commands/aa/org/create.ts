@@ -109,7 +109,7 @@ export default class OrgCreate extends SfdxCommand {
         const response = await exec(
             constructCommand(`sfdx force:org:create --json`, this.flags)
         );
-        const username = JSON.parse(response.message).result.username;
+        const username = JSON.parse(response).result.username;
         return {
             username,
             message: `\nSuccessfully created scratch org ${username}`
