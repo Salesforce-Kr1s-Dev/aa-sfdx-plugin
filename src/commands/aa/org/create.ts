@@ -81,6 +81,7 @@ export default class OrgCreate extends SfdxCommand {
                 this.ux.startSpinner('Creating scratch org');
                 const response = await this.createScratchOrg();
                 if (!isCreateOnly) {
+                    await this.installDependencies(response.username);
                     await this.pushSourceToOrg(response.username);
                 }
                 this.ux.stopSpinner(response.message);
@@ -125,6 +126,18 @@ export default class OrgCreate extends SfdxCommand {
             this.ux.setSpinnerStatus('\nNo Definition File found. Using default definition file...');
             this.flags.definitionfile = defaultPath;
         }
+    }
+
+    /**
+     * @description                 Install project dependencies to newly created scratch org
+     * 
+     * @param username              Username of scratch org
+     */
+    installDependencies = async (username) => {
+        this.ux.setSpinnerStatus('Deploying source to new scratch org...');
+        const command = `sfdx aa:package:dependency:install -u ${username} --json`;
+        await exec(command);
+        this.ux.setSpinnerStatus(`Successfully installed package dependencies to ${username}`);
     }
 
     /**
