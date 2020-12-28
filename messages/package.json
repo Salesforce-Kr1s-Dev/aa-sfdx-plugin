@@ -1,0 +1,7 @@
+{
+    "dependency": {
+        "install": {
+            "commandDescription": "install package dependencies to target org; given the packages have no password"
+        }
+    }
+}
