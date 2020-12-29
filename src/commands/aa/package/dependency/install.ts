@@ -15,7 +15,6 @@ export default class PackageDependencyInstall extends SfdxCommand {
     public static description = messages.getMessage('dependency.install.commandDescription');
     protected static requiresUsername = true; // Require username
     protected static requiresProject = true; // Require SFDX project
-    protected static supportsDevhubUsername = true; // Support Devhub
 
     public static examples = [
         `$ sfdx aa:package:dependency:install -u MyScratchOrg`
