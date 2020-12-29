@@ -70,14 +70,14 @@ export default class PackageInstall extends SfdxCommand {
     }
 
     fetchInstallPackageStatus = async (Id) => {
-        console.log('fetching status..');
+        const TIMEOUT_BEFORE_NEXT_REQUEST = 1000;
         const command = `sfdx force:package:install:report --requestid ${Id} --targetusername ${this.org.getUsername()} --json`;
         const response = await exec(command);
         const { Status, SubscriberPackageVersionKey } = JSON.parse(response).result;
         if (Status !== 'SUCCESS') {
             setTimeout(async () => {
                 return await this.fetchInstallPackageStatus(Id);
-            }, 1000)
+            }, TIMEOUT_BEFORE_NEXT_REQUEST)
         }
         return `Successfully installed package [${SubscriberPackageVersionKey}]`;
     }
