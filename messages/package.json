@@ -1,4 +1,16 @@
 {
+    "install": {
+        "commandDescription": "install package to target org without prompt; wraps force:package:install",
+        "flags": {
+            "apexcompile": "compile all apex in the org and package, or only Apex in the package; unlocked packages only",
+            "publishwait": "number of minutes to wait for subscriber package version ID to become available in the target org",
+            "installationkey": "installation key for key-protected package",
+            "package": "ID (starts with 04t) or alias of the package version to install",
+            "securitytype": "security access type for the installed package (deprecation notice: The default --securitytype value will change from AllUsers to AdminsOnly in  v47.0 or later.)",
+            "upgradetype": "the upgrade type for the package installation; available only for unlocked packages",
+            "wait": "number of minutes to wait for installation status"
+        }
+    },
     "dependency": {
         "install": {
             "commandDescription": "install package dependencies to target org; given the packages have no password"
