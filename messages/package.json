@@ -8,7 +8,9 @@
             "package": "ID (starts with 04t) or alias of the package version to install",
             "securitytype": "security access type for the installed package (deprecation notice: The default --securitytype value will change from AllUsers to AdminsOnly in  v47.0 or later.)",
             "upgradetype": "the upgrade type for the package installation; available only for unlocked packages",
-            "wait": "number of minutes to wait for installation status"
+            "wait": "number of minutes to wait for installation status",
+            "preinstallationscripts": "path to a directory that contains apex files to execute before installing package",
+            "postinstallationscripts": "path to a directory that contains apex files to execute after installing package"
         }
     },
     "dependency": {
