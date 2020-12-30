@@ -25,43 +25,89 @@ export default class PackageInstall extends SfdxCommand {
             options: ['all', 'package'],
             default: 'all'
         }),
+
         installationkey: flags.minutes({
             char: 'k',
             description: messages.getMessage('install.flags.installationkey'),
             default: null
         }),
+
         package: flags.string({
             char: 'p',
             description: messages.getMessage('install.flags.package'),
             required: true
         }),
+
         securitytype: flags.enum({
             char: 's',
             description: messages.getMessage('install.flags.securitytype'),
             options: ['AllUsers', 'AdminsOnly'],
             default: 'AdminsOnly'
         }),
+
         upgradetype: flags.enum({
             char: 't',
             description: messages.getMessage('install.flags.upgradetype'),
             options: ['DeprecateOnly', 'Mixed', 'Delete'],
             default: 'Mixed'
         }),
+
+        preinstallationscripts: flags.directory({
+            char: 'r',
+            description: messages.getMessage('install.flags.preinstallationscripts'),
+        }),
+
+        postinstallationscripts: flags.directory({
+            char: 'o',
+            description: messages.getMessage('install.flags.postinstallationscripts'),
+        })
     };
 
     public async run(): Promise<AnyJson> {
+        const params = JSON.parse(JSON.stringify(this.flags));
+        this.deleteCustomParams();
+
         try {
             this.ux.startSpinner(`Installing package [${this.flags.package}] to ${this.org.getUsername()}`);
-            const result = await this.installPackage();
-            this.ux.stopSpinner(`\n${result}`);
-            return { message: result }
+
+            if (params.preinstallationscripts) {
+                await this.executeApexScripts(params.preinstallationscripts);
+            }
+
+            const message = await this.installPackage();
+
+            if (params.postinstallationscripts) {
+                await this.executeApexScripts(params.postinstallationscripts);
+            }
+
+            this.ux.stopSpinner(`\n${message}`);
+            return { message }
         } catch (err) {
             throw new SfdxError(err.message);
         }
-        
     }
 
+    /**
+     * @description                 Delete custom params
+     */
+    deleteCustomParams = () => {
+        delete this.flags.preinstallationscripts;
+        delete this.flags.postinstallationscripts;
+    }
 
+    /**
+     * @description                 Execute .apex files in directory
+     * 
+     * @param path                  Directory path
+     */
+    executeApexScripts = async (path) => {
+        const command = `sfdx aa:apex:execute --targetusername ${this.org.getUsername()} --apexcodedirectory ${path} --json`;
+        await exec(command);
+    }
+
+    /**
+     * @description                 Install package to target org without prompt
+     */
     installPackage = async () => {
         const command = constructCommand(`sfdx force:package:install --noprompt --wait 10 --json`, this.flags);
         const { Id } = JSON.parse(await exec(command)).result;
@@ -69,6 +115,11 @@ export default class PackageInstall extends SfdxCommand {
         return packageStatus;
     }
 
+    /**
+     * @description                 Fetch install package status -- persistent
+     * 
+     * @param Id                    Id of package install request
+     */
     fetchInstallPackageStatus = async (Id) => {
         const TIMEOUT_BEFORE_NEXT_REQUEST = 1000;
         const command = `sfdx force:package:install:report --requestid ${Id} --targetusername ${this.org.getUsername()} --json`;
