@@ -1,0 +1,9 @@
+{
+    "execute": {
+        "commandDescription": "execute anonymous apex code(.apex) -- either specific file/in directory; wraps force:apex:execute",
+        "flags": {
+            "apexcodefile": "path to local file that contains the apex code",
+            "apexcodedirectory": "path to directory that contains the apex files"
+        }
+    }
+}
