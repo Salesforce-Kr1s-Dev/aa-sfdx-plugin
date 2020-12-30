@@ -22,7 +22,7 @@ export default class OrgCreate extends SfdxCommand {
     ];
 
     protected static flagsConfig = {
-        clientid: flags.string({
+        clientid: flags.id({
             char: 'i',
             description: messages.getMessage('create.flags.clientid')
         }),
@@ -32,7 +32,7 @@ export default class OrgCreate extends SfdxCommand {
             default: false
         }),
 
-        definitionfile: flags.string({
+        definitionfile: flags.filepath({
             char: "f",
             description: messages.getMessage('create.flags.definitionfile')
         }),
@@ -55,7 +55,7 @@ export default class OrgCreate extends SfdxCommand {
             description: messages.getMessage('create.flags.nonamespace')
         }),
 
-        type: flags.string({
+        type: flags.enum({
             char: 't',
             default: 'scratch',
             options: ['scratch', 'sandbox'],
