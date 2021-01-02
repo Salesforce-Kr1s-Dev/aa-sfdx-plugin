@@ -1,4 +1,13 @@
 {
+    "password": {
+        "set": {
+            "commandDescription": "set user password",
+            "flags": {
+                "username": "username of the user",
+                "password": "user password to have"
+            }
+        }
+    },
     "permset": {
         "assign": {
             "commandDescription": "assign permission set to a user",
