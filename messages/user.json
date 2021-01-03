@@ -1,4 +1,13 @@
 {
+    "email": {
+        "set": {
+            "commandDescription": "set user email",
+            "flags": {
+                "username": "username of the user",
+                "email": "email to set"
+            }
+        }
+    },
     "password": {
         "reset": {
             "commandDescription": "reset user password",
