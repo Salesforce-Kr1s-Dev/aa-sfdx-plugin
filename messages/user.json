@@ -10,9 +10,9 @@
     },
     "permset": {
         "assign": {
-            "commandDescription": "assign permission set to a user",
+            "commandDescription": "assign permission set to user/s",
             "flags": {
-                "username": "username of the users (comma-separated for multiple values)",
+                "usernames": "username of the users (comma-separated for multiple values)",
                 "name": "permission set name or label"
             }
         }

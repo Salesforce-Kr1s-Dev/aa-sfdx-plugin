@@ -23,7 +23,7 @@ export default class UserPermsetAssign extends SfdxCommand {
 
         usernames: flags.array({
             char: 's',
-            description: messages.getMessage('permset.assign.flags.username'),
+            description: messages.getMessage('permset.assign.flags.usernames'),
             required: true
         })
     };
