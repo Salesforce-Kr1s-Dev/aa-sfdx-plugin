@@ -1,5 +1,11 @@
 {
     "password": {
+        "reset": {
+            "commandDescription": "reset user password",
+            "flags": {
+                "username": "username of the user"
+            }
+        },
         "set": {
             "commandDescription": "set user password",
             "flags": {
