@@ -126,7 +126,7 @@ export default class OrgCreate extends SfdxCommand {
      * @param username              Username of scratch org
      */
     installDependencies = async (username) => {
-        this.ux.setSpinnerStatus('Deploying source to new scratch org...');
+        this.ux.setSpinnerStatus('\nInstalling dependencies to new scratch org...');
         const command = `sfdx aa:package:dependency:install -u ${username} --json`;
         await exec(command);
         this.ux.setSpinnerStatus(`Successfully installed package dependencies to ${username}`);
@@ -138,7 +138,7 @@ export default class OrgCreate extends SfdxCommand {
      * @param username              Username of scratch org
      */
     pushSourceToOrg = async (username) => {
-        this.ux.setSpinnerStatus('Deploying source to new scratch org...');
+        this.ux.setSpinnerStatus('\nDeploying source to new scratch org...');
         const command = `sfdx force:source:push -f -g -u ${username} -w 10 --json`;
         await exec(command);
         this.ux.setSpinnerStatus(`Successfully deployed the component to ${username}`);
