@@ -36,11 +36,11 @@ export default class ApexExecute extends SfdxCommand {
     };
 
     public async run(): Promise<AnyJson> {
-        this.validate();
         try {
+            this.validate();
             this.ux.startSpinner('Executing anonymous apex');
             const message = await this.execute();
-            this.ux.stopSpinner(`\nSuccesfully executed anonymous apex. \n${JSON.stringify(message, null, 4)}`);
+            this.ux.stopSpinner(`\nSuccesfully executed anonymous apex. \n${message}`);
             return { message };
         } catch (err) {
             throw new SfdxError(err.message);
@@ -53,7 +53,7 @@ export default class ApexExecute extends SfdxCommand {
     validate = () => {
         if ((this.flags.apexcodefile && this.flags.apexcodedirectory)
             || (!this.flags.apexcodefile && !this.flags.apexcodedirectory)) {
-            throw new SfdxError('Please provide only either the path to apex file or directory that contains the files')
+            throw new Error('Please provide only either the path to apex file or directory that contains the files')
         }
     }
 
@@ -63,13 +63,13 @@ export default class ApexExecute extends SfdxCommand {
     execute = async () => {
         let result;
         if (this.flags.apexcodefile) {
-            result = await this.executeAnonymousApex(this.flags.apexcodefile);
+            result = this.validateResponses([await this.executeAnonymousApex(this.flags.apexcodefile)]);
         }
 
         if (this.flags.apexcodedirectory) {
             result = await this.executeApexScripts(this.flags.apexcodedirectory);
         }
-        return result;
+        return JSON.stringify(result, null, 4);
     }
 
     /**
@@ -86,14 +86,8 @@ export default class ApexExecute extends SfdxCommand {
         const promises = payload.map(el => this.executeAnonymousApex(el));
         const result = await Promise.all(promises)
             .then(res => {
-                return res;
+                return this.validateResponses(res);
             });
-
-        const failedResponse = result.filter(el => !el.success || !el.compiled);
-        if (failedResponse.length > 0) {
-            throw new Error(`Failed to execute the following scripts: \n${JSON.stringify(failedResponse, null, 4)}`);
-        }
-
         return result;
     }
 
@@ -124,8 +118,22 @@ export default class ApexExecute extends SfdxCommand {
      */
     executeAnonymousApex = async (path) => {
         const command = `sfdx force:apex:execute --targetusername ${this.org.getUsername()} --apexcodefile ${path} --json`;
-        const { result } = await exec(command);
-        delete result.logs; //Delete logs as it may reach buffer limit
-        return { path, ...result };
+        const response = await exec(command);
+        delete response.result.logs; //Delete logs as it may reach buffer limit
+        return { path, ...response };
+    }
+
+    /**
+     * @description                 Validate responses from apex execution
+     *                              Throw an error if there's a failed execution
+     * 
+     * @param responses             responses to validate
+     */
+    validateResponses = (responses) => {
+        const failedResponse = responses.filter(el => !el.result.success || !el.result.compiled);
+        if (failedResponse.length > 0) {
+            throw new Error(`Failed to execute the following scripts: \n${JSON.stringify(failedResponse, null, 4)}`);
+        }
+        return responses;
     }
 }
