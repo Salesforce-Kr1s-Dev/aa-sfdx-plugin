@@ -4,11 +4,7 @@ import { AnyJson } from '@salesforce/ts-types';
 // Custom imports
 import { exec } from '../../../../shared/exec';
 
-// Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
-
-// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
-// or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('aa', 'package');
 
 export default class PackageDependencyInstall extends SfdxCommand { 
@@ -102,14 +98,36 @@ export default class PackageDependencyInstall extends SfdxCommand {
             return;
         }
 
-        const commands = [];
-        const packages = Object.keys(dependencies).join(', ');
-        this.ux.setSpinnerStatus(`\nInstalling the following dependencies: \n${packages}`);
-        Object.values(dependencies).forEach(el => {
-            commands.push(`sfdx force:package:install -a package -b 10 -p ${el} -t DeprecateOnly -u ${this.org.getUsername()} -w 10 -r`);
+        const payload = this.constructPayload(dependencies);
+        this.ux.setSpinnerStatus(`\nInstalling the following dependencies: \n[${payload.map(el => el.name).join(', ')}]`);
+        await Promise.all(payload.map(el => el.result))
+        .then(response => {
+            response.forEach((el, index) => {
+                delete el.stack; //Removing stack trace
+                payload[index].result = el;
+            })
         })
 
-        await exec(commands.join(' & '));
-        return `Successfully installed the following dependencies: ${packages} to ${this.org.getUsername()}`;
+        const failedResults = payload.filter(el => el.result.status === 1);
+        if (failedResults.length > 0) {
+            throw new Error(`\nFailed to install the following dependencies: \n${JSON.stringify(failedResults, null, 4)}`);
+        }
+
+        return `Successfully installed the dependencies [${payload.map(el => el.name).join(', ')}] to org ${this.org.getUsername()}`;
+    }
+
+    /**
+     * @description                 Construct payload
+     * 
+     * @param dependencies          List of project dependencies
+     */
+    constructPayload = (dependencies) => {
+        const payload = [];
+        for (const name in dependencies) {
+            const packageId = dependencies[name];
+            const result = exec(`sfdx force:package:install -a package -b 10 -p ${packageId} -t DeprecateOnly -u ${this.org.getUsername()} -w 10 -r --json`);
+            payload.push({ name, packageId, result });
+        }
+        return payload;
     }
 }
