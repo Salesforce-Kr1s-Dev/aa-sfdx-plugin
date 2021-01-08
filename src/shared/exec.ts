@@ -4,13 +4,14 @@ import * as util from 'util';
 const execCom = util.promisify(exec);
 
 const exec2SON = async (cmd: string, options = { maxBuffer: 1024 * 1024 * 10 }): Promise<any> => {
-    const message = await execCom(cmd, options)
+    const message = JSON.parse(await execCom(cmd, options)
         .then(response => {
-            return JSON.parse(response.stdout ? response.stdout : response.stderr);
+            return response.stdout ? response.stdout : response.stderr;
         })
         .catch(err => {
-            return JSON.parse(err.stdout ? err.stdout : err.stderr);
-        })
+            return err.stdout ? err.stdout : err.stderr;
+        }));
+    delete message.stack; //Remove stack if error
     return message;
 }
 
