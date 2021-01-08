@@ -40,7 +40,7 @@ export default class ApexExecute extends SfdxCommand {
         try {
             this.ux.startSpinner('Executing anonymous apex');
             const message = await this.execute();
-            this.ux.stopSpinner(`\nSuccesfully executed anonymous apex. \n[${JSON.stringify(message, null, 4)}]`);
+            this.ux.stopSpinner(`\nSuccesfully executed anonymous apex. \n${JSON.stringify(message, null, 4)}`);
             return { message };
         } catch (err) {
             throw new SfdxError(err.message);
@@ -83,12 +83,18 @@ export default class ApexExecute extends SfdxCommand {
         }
 
         const payload = this.fetchApexFiles(path);
-        const results = [];
-        for (let index = 0; index < payload.length; index++) {
-            const response = await this.executeAnonymousApex(payload[index]);
-            results.push(response);
+        const promises = payload.map(el => this.executeAnonymousApex(el));
+        const result = await Promise.all(promises)
+            .then(res => {
+                return res;
+            });
+
+        const failedResponse = result.filter(el => !el.success || !el.compiled);
+        if (failedResponse.length > 0) {
+            throw new Error(`Failed to execute the following scripts: \n${JSON.stringify(failedResponse, null, 4)}`);
         }
-        return results;
+
+        return result;
     }
 
     /**
@@ -118,12 +124,8 @@ export default class ApexExecute extends SfdxCommand {
      */
     executeAnonymousApex = async (path) => {
         const command = `sfdx force:apex:execute --targetusername ${this.org.getUsername()} --apexcodefile ${path} --json`;
-        const response = await exec(command);
-        const result = JSON.parse(response).result;
-        if (!result.success) {
-            throw new Error(`Failed to execute ${path} \n${response}`);
-        }
+        const { result } = await exec(command);
         delete result.logs; //Delete logs as it may reach buffer limit
-        return { path, ...result};
+        return { path, ...result };
     }
 }
