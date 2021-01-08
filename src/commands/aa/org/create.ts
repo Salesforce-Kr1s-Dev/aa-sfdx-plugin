@@ -98,11 +98,11 @@ export default class OrgCreate extends SfdxCommand {
      * @description                 Create org, either scratch or sandbox org
      */
     createScratchOrg = async () => {
+        delete this.flags.json;
         this.addDefinitionFileIfNone();
-        const response = await exec(
-            constructCommand(`sfdx force:org:create --json`, this.flags)
-        );
-        const username = JSON.parse(response).result.username;
+        const command = constructCommand(`sfdx force:org:create --json`, this.flags);
+        const response = await this.fetchResponse(command);
+        const username = response.result.username;
         return {
             username,
             message: `\nSuccessfully created scratch org ${username}`
@@ -128,7 +128,7 @@ export default class OrgCreate extends SfdxCommand {
     installDependencies = async (username) => {
         this.ux.setSpinnerStatus('\nInstalling dependencies to new scratch org...');
         const command = `sfdx aa:package:dependency:install -u ${username} --json`;
-        await exec(command);
+        await this.fetchResponse(command);
         this.ux.setSpinnerStatus(`\nSuccessfully installed package dependencies to ${username}`);
     }
 
@@ -140,7 +140,21 @@ export default class OrgCreate extends SfdxCommand {
     pushSourceToOrg = async (username) => {
         this.ux.setSpinnerStatus('\nDeploying source to new scratch org...');
         const command = `sfdx force:source:push -f -g -u ${username} -w 10 --json`;
-        await exec(command);
+        await this.fetchResponse(command);
         this.ux.setSpinnerStatus(`\nSuccessfully deployed the component to ${username}`);
+    }
+
+    /**
+     * @description                 Execute command
+     *                              Will throw an error if response status != 0
+     * 
+     * @param command               command to execute
+     */
+    fetchResponse = async (command) => {
+        const response = await exec(command);
+        if (response.status !== 0) {
+            throw new Error(JSON.stringify(response, null, 4));
+        }
+        return response;
     }
 }
