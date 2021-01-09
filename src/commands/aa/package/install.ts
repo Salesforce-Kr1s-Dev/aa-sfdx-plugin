@@ -110,8 +110,13 @@ export default class PackageInstall extends SfdxCommand {
      */
     installPackage = async () => {
         const command = constructCommand(`sfdx force:package:install --noprompt --wait 10 --json`, this.flags);
-        const { Id } = JSON.parse(await exec(command)).result;
-        const packageStatus = await this.fetchInstallPackageStatus(Id);
+        const response = await exec(command);
+
+        if (response.status !== 0) {
+            throw new Error(`\n${JSON.stringify(response, null, 4)}`);
+        }
+
+        const packageStatus = await this.fetchInstallPackageStatus(response);
         return packageStatus;
     }
 
@@ -120,16 +125,29 @@ export default class PackageInstall extends SfdxCommand {
      * 
      * @param Id                    Id of package install request
      */
-    fetchInstallPackageStatus = async (Id) => {
-        const TIMEOUT_BEFORE_NEXT_REQUEST = 1000;
+    fetchInstallPackageStatus = async (payload) => {
+        await this.timeout(); //Set timeout before next request
+        const { Id, Status , SubscriberPackageVersionKey } = payload.result; 
+        if (Status === 'SUCCESS') {
+            return `Successfully installed package [${SubscriberPackageVersionKey}]. \n${JSON.stringify(payload, null, 4)}`;
+        }
+
         const command = `sfdx force:package:install:report --requestid ${Id} --targetusername ${this.org.getUsername()} --json`;
         const response = await exec(command);
-        const { Status, SubscriberPackageVersionKey } = JSON.parse(response).result;
-        if (Status !== 'SUCCESS') {
-            setTimeout(async () => {
-                return await this.fetchInstallPackageStatus(Id);
-            }, TIMEOUT_BEFORE_NEXT_REQUEST)
+
+        if (response.status !== 0) {
+            throw new Error(`\nFailed to fetch install status with request Id: ${Id}. \n${JSON.stringify(response, null, 4)}`);
         }
-        return `Successfully installed package [${SubscriberPackageVersionKey}]`;
+
+        return this.fetchInstallPackageStatus(payload);
+    }
+
+
+    /**
+     * @description                 Set timeout before next request
+     */
+    timeout = () => {
+        const TIMEOUT_BEFORE_NEXT_REQUEST = 1000;
+        return new Promise(resolve => setTimeout(resolve, TIMEOUT_BEFORE_NEXT_REQUEST));
     }
 }
