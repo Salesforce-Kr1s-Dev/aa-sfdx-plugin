@@ -26,7 +26,7 @@ export default class PackageInstall extends SfdxCommand {
             default: 'all'
         }),
 
-        installationkey: flags.minutes({
+        installationkey: flags.string({
             char: 'k',
             description: messages.getMessage('install.flags.installationkey'),
             default: null
