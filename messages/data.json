@@ -1,0 +1,9 @@
+{
+    "import": {
+        "commandDescription": "import data with/without recordtype developer name(NOT ID) to target org; wraps force:data:tree:import",
+        "flags": {
+            "sobjecttreefiles": "comma-delimited, comma-delimited, ordered paths of json files containing collection of record trees to insert",
+            "plan": "path to plan to insert multiple data files that have master-detail relationships"
+        }
+    }
+}
