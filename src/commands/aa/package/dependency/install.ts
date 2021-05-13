@@ -40,7 +40,7 @@ export default class PackageDependencyInstall extends SfdxCommand {
         const dependencies = await this.fetchDependencies();
         const command = `sfdx force:package:installed:list -u ${this.org.getUsername()} --json`;
         const response = await exec(command);
-        JSON.parse(response).result.forEach(el => {
+        response.result.forEach(el => {
             if (dependencies[el.SubscriberPackageName] === el.SubscriberPackageVersionId) {
                 delete dependencies[el.SubscriberPackageName];
             }
